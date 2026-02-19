@@ -1,0 +1,20 @@
+{
+  "name": "rift-monorepo",
+  "version": "1.0.0",
+  "description": "RIFT 2026 Hackathon - Autonomous CI/CD Healing Agent",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+  },
+  "keywords": [
+    "rift",
+    "cicd",
+    "ai-agent",
+    "hackathon"
+  ],
+  "author": "Team ETS",
+  "license": "MIT"
+}

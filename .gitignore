@@ -1,0 +1,56 @@
+# ===========================
+# RIFT - Root .gitignore
+# ===========================
+
+# Environment files - NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Logs
+*.log
+logs/
+startup.log
+
+# ===========================
+# Backend specific
+# ===========================
+
+# Cloned repos (workspace) - can be large and are ephemeral
+backend/workspace/
+
+# Test diagnostic files
+backend/test-git.mjs
+
+# Results files (generated at runtime)
+backend/workspace/results_*.json
+
+# ===========================
+# Frontend specific
+# ===========================
+
+frontend/.vite/
+frontend/dist/
+frontend/build/

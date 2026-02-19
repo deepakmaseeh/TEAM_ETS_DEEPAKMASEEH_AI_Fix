@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Autonomous CI/CD Healing Agent - RIFT 2026</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css" id="theme">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/monokai.min.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+      :root {
+        --bg-color: #030712;
+        --card-bg: #111827;
+        --border-color: #1f2937;
+        --primary: #3b82f6;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --text-primary: #f9fafb;
+        --text-secondary: #9ca3af;
+        --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      }
+
+      body { background-color: var(--bg-color); font-family: 'Plus Jakarta Sans', sans-serif !important; }
+      .reveal { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-primary); }
+
+      /* Background Grid */
+      .bg-grid {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px; z-index: -1;
+      }
+      .bg-glow {
+        position: fixed; top: 50%; left: 50%; width: 60vw; height: 60vw;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+        transform: translate(-50%, -50%); z-index: -1; pointer-events: none;
+      }
+
+      /* Components */
+      .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; width: 100%; margin-top: 40px; }
+      .bento-card {
+        background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px;
+        text-align: left; transition: transform 0.2s, border-color 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; justify-content: flex-start;
+      }
+      .bento-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+      .bento-card h4 { font-size: 1.1rem !important; margin: 0 0 10px 0 !important; color: white !important; }
+      .bento-card p { font-size: 0.9rem; margin: 0; line-height: 1.5; color: var(--text-secondary); }
+
+      .badge {
+        display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;
+        letter-spacing: 0.05em; text-transform: uppercase; background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); margin-bottom: 15px;
+      }
+
+      /* Code Styling */
+      pre {
+        background: #0f1219 !important; border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+        width: 100% !important; margin: 20px auto !important;
+      }
+      code { font-family: 'JetBrains Mono', monospace !important; font-size: 0.9em !important; line-height: 1.4 !important; }
+
+      .title-gradient { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      
+      .screenshot-container {
+        margin: 30px auto;
+        padding: 10px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        max-width: 900px;
+        overflow:hidden;
+      }
+      .screenshot-img {
+        width: 100%;
+        border-radius: 8px;
+        display: block;
+      }
+
+      .score-display {
+        font-size: 5rem;
+        font-weight: 800;
+        line-height: 1;
+        background: linear-gradient(135deg, #3b82f6, #10b981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      
+      .team-member {
+        text-align: center; padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--card-bg);
+      }
+      .team-avatar {
+        width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border-radius: 50%; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
+        font-size: 2rem;
+      }
+      
+      .mermaid {
+        background: var(--card-bg) !important;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="reveal">
+      <div class="slides">
+
+        <!-- 1. Title -->
+        <section>
+          <div class="badge">RIFT 2026: Autonomous Systems</div>
+          <h1 style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px;">
+            Autonomous<br><span class="title-gradient">CI/CD Healing Agent</span>
+          </h1>
+          <p style="font-size: 1.3rem; max-width: 700px; margin: 0 auto; color: var(--text-secondary);">
+            Self-healing pipelines that detect, reason, and fix code failures without human intervention.
+          </p>
+        </section>
+
+        <!-- 2. The Team -->
+        <section>
+          <div class="badge">The Builders</div>
+          <h2>Meet Team ETS</h2>
+          <div style="display: flex; gap: 30px; justify-content: center; margin-top: 50px;">
+            <div class="team-member">
+              <div class="team-avatar">👨‍💻</div>
+              <h4 style="margin: 0;">Deepakmaseeh</h4>
+              <p style="font-size: 0.9rem; color: var(--primary);">Team Lead</p>
+              <p style="font-size: 0.8rem; margin-top: 10px;">Architecture & Agent Flow</p>
+            </div>
+            
+            <div class="team-member">
+              <div class="team-avatar">🤖</div>
+              <h4 style="margin: 0;">Multi-Agent Swarm</h4>
+              <p style="font-size: 0.9rem; color: var(--secondary);">Co-Pilot</p>
+              <p style="font-size: 0.8rem; margin-top: 10px;">Automated Fixing & Testing</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Problem & Solution -->
+        <section>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; text-align: left;">
+            <div>
+              <h3 style="color: #ef4444;">The Problem</h3>
+              <p>CI/CD is broken. Developers spend <strong>60% of their time</strong> debugging trivial pipeline failures.</p>
+              <ul style="font-size: 1rem; margin-top: 20px;">
+                <li>Context switching kills productivity</li>
+                <li>Manual log parsing is slow</li>
+                <li>"Works on my machine" issues</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="color: var(--success);">The Solution</h3>
+              <p>An autonomous agent that <strong>lives in your pipeline</strong>.</p>
+              <ul style="font-size: 1rem; margin-top: 20px;">
+                <li>Auto-detects failure patterns</li>
+                <li>Generates semantic fixes via LLM</li>
+                <li>Verifies in Docker sandbox</li>
+                <li>Commits only when tests pass</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Real Results -->
+        <section>
+          <div class="badge">Production Validation</div>
+          <h2>Real-World Performance</h2>
+          <p style="margin-bottom: 40px;">Metrics from our latest autonomous run.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+            <div style="text-align: center;">
+              <div class="score-display">110</div>
+              <div style="font-size: 1.2rem; color: var(--text-secondary); margin-top: 10px;">Total Score</div>
+              
+              <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+                 <div class="badge" style="background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.2);">
+                   Base: 100
+                 </div>
+                 <div class="badge" style="background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.2);">
+                   Bonus: +10
+                 </div>
+              </div>
+            </div>
+            
+            <div class="bento-card">
+              <h4 style="color: var(--primary); margin-bottom: 20px !important;">Run Summary</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem;">
+                <div>
+                  <div style="opacity: 0.6; font-size: 0.8rem;">Status</div>
+                  <div style="color: var(--success); font-weight: bold;">PASSED</div>
+                </div>
+                <div>
+                  <div style="opacity: 0.6; font-size: 0.8rem;">Iterations</div>
+                  <div style="font-weight: bold;">5 / 5</div>
+                </div>
+                <div>
+                  <div style="opacity: 0.6; font-size: 0.8rem;">Team</div>
+                  <div style="font-weight: bold;">Team ETS</div>
+                </div>
+                 <div>
+                  <div style="opacity: 0.6; font-size: 0.8rem;">Fixes Applied</div>
+                  <div style="font-weight: bold; color: var(--secondary);">Automated</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Dashboard Screenshot -->
+        <section>
+          <h2>Live Dashboard</h2>
+          <div class="screenshot-container">
+            <img src="./dashboard.png" class="screenshot-img" alt="Dashboard Screenshot" onerror="this.onerror=null; this.src='https://placehold.co/800x450/111827/FFF?text=Please+save+your+screenshot+as+dashboard.png';">
+          </div>
+        </section>
+
+        <!-- 6. Architecture Diagram (FROM visual_assets.md) -->
+        <section>
+          <div class="badge">System Architecture</div>
+          <h3>Detailed Component View</h3>
+          <div class="mermaid">
+            graph TD
+              subgraph Frontend [React Dashboard]
+                  UI[User Interface]
+              end
+          
+              subgraph Backend [FastAPI Backend]
+                  API[API Server]
+                  LG[LangGraph Orchestrator]
+              end
+          
+              subgraph Agents [Multi-Agent System]
+                  DA[Discovery Agent]
+                  AA[Analysis Agent]
+                  FA[Fixing Agent]
+                  TA[Testing Agent]
+                  GA[GitOps Agent]
+                  MA[Monitor Agent]
+              end
+          
+              subgraph Infrastructure [Docker Sandbox]
+                  Exec[Safe Execution Environment]
+              end
+          
+              UI -->|REST API| API
+              API -->|Trigger| LG
+              LG -->|Coordinate| DA
+              LG -->|Coordinate| AA
+              LG -->|Coordinate| FA
+              LG -->|Coordinate| TA
+              LG -->|Coordinate| GA
+              LG -->|Coordinate| MA
+              
+              TA -->|Run Tests| Exec
+              FA -->|Apply Fixes| Exec
+          </div>
+        </section>
+
+        <!-- 7. Agent Workflow (FROM visual_assets.md) -->
+        <section>
+          <div class="badge">Workflow</div>
+          <h3>Agent Decision Matrix</h3>
+          <div class="mermaid">
+            stateDiagram-v2
+              [*] --> Clone: User Input
+              Clone --> Analyze: Repo Ready
+              Analyze --> Fix: Failure Detected
+              Fix --> Verify: Fix Applied
+              Verify --> PUSH: Tests Passed
+              Verify --> Analyze: Tests Failed (Iterate)
+              PUSH --> Monitor: PR Created
+              Monitor --> [*]: Pipeline Success
+          </div>
+        </section>
+
+        <!-- 8. Detailed Iteration Flow (NEW from visual_assets.md) -->
+        <section>
+          <div class="badge">Sequence</div>
+          <h3>Healing Cycle Sequence</h3>
+          <div class="mermaid">
+            sequenceDiagram
+              participant User
+              participant Orchestrator
+              participant Agents
+              participant Sandbox
+          
+              User->>Orchestrator: Start Agent
+              Orchestrator->>Agents: Discovery (Identify Stack)
+              loop Healing Cycle
+                  Orchestrator->>Sandbox: Run Tests
+                  Sandbox-->>Orchestrator: Failure Log
+                  Orchestrator->>Agents: Generate Fix
+                  Agents-->>Orchestrator: Apply Code Change
+                  Orchestrator->>Sandbox: Verify Fix
+              end
+              Orchestrator->>User: Success (Tests Passed)
+          </div>
+        </section>
+
+        <!-- 9. Code: Orchestration -->
+        <section>
+          <div class="badge">Under the Hood</div>
+          <h3>Orchestration Logic</h3>
+          <pre><code class="language-javascript" data-trim data-line-numbers="1-5|13-18|26-30">
+// backend/src/agents/coordinatorAgent.js
+
+export async function runAgent(runId, repoUrl, ...) {
+  // 1. Initialize Swarm
+  const repoAnalyzer = new RepoAnalyzerAgent(workspaceDir);
+  const testRunner = new TestRunnerAgent();
+  const fixGenerator = new FixGeneratorAgent();
+
+  // 2. Clone & Discover
+  const repoPath = await repoAnalyzer.cloneRepository(repoUrl);
+  const testFiles = await repoAnalyzer.discoverTestFiles(repoPath);
+
+  // 3. Iterative Healing Loop
+  while (iteration < retryLimit) {
+    const failures = await testRunner.runTests(repoPath);
+    
+    if (failures.length === 0) return { status: 'PASSED' };
+
+    // 4. Generate & Apply Semantic Fixes
+    for (const failure of failures) {
+      const fix = await fixGenerator.generateFix(failure);
+      await fixGenerator.applyFix(repoPath, fix);
+    }
+    
+    iteration++;
+  }
+}
+          </code></pre>
+        </section>
+
+        <!-- 10. Code: Fix Generation -->
+        <section>
+          <div class="badge">Under the Hood</div>
+          <h3>AI Fix Generation</h3>
+          <pre><code class="language-javascript" data-trim data-line-numbers="1|4-8|11-14">
+// backend/src/agents/fixGeneratorAgent.js
+
+async generateFix(failure, context) {
+  // Construct prompt with stack trace + file context
+  const prompt = `
+    Error: ${failure.message}
+    File: ${context.fileContent}
+    Fix this specific error. Return JSON only.
+  `;
+
+  // Call LLM (GPT-4)
+  const fix = await this.llm.predict(prompt);
+  
+  // Validate syntax before applying
+  if (this.validator.checkSyntax(fix.code)) {
+    return fix;
+  }
+}
+          </code></pre>
+        </section>
+
+        <!-- 11. Future & Conclusion -->
+        <section>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <div class="bento-card">
+              <h4 style="color: var(--secondary);">Future Roadmap</h4>
+              <ul style="font-size: 0.9rem; margin-top: 15px; padding-left: 20px;">
+                 <li>Support for Rust & Go</li>
+                 <li>GitHub App Integration</li>
+                 <li>Enterprise On-Prem Deployment</li>
+              </ul>
+            </div>
+            <div class="bento-card" style="justify-content: center; text-align: center;">
+              <h4 style="margin-bottom: 20px !important;">Thank You</h4>
+              <p>Team ETS</p>
+              <p style="font-size: 0.8rem; opacity: 0.6;">github.com/TeamETS/rift-agent</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true, theme: 'dark', fontFamily: 'Plus Jakarta Sans', securityLevel: 'loose' });
+      Reveal.initialize({
+        hash: true, width: 1280, height: 720, margin: 0.1,
+        transition: 'slide', backgroundTransition: 'fade',
+        controls: true, progress: true, center: true,
+        plugins: [ RevealMarkdown, RevealHighlight ]
+      });
+    </script>
+  </body>
+</html>

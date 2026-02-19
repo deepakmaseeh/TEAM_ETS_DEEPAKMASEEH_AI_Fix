@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rift-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - FRONTEND_URL=http://localhost:5173
+      - DOCKER_SOCKET_PATH=/var/run/docker.sock
+      - MAX_RETRIES=5
+    volumes:
+      - ./backend:/app
+      - ./workspace:/app/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /app
+    command: npm run dev
+    networks:
+      - rift-network
+
+  sandbox:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.sandbox
+    container_name: rift-sandbox
+    environment:
+      - WORKSPACE=/workspace
+    volumes:
+      - ./workspace:/workspace
+    networks:
+      - rift-network
+    profiles:
+      - sandbox
+
+networks:
+  rift-network:
+    driver: bridge
