@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { RunProvider } from './context/RunContext';
-import { ThemeProvider } from './context/ThemeContext';
 import AppHeader from './components/AppHeader';
 import InputSection from './components/InputSection';
 import RunSummaryCard from './components/RunSummaryCard';
@@ -15,7 +14,6 @@ import RepositoryStats from './components/RepositoryStats';
 import PerformanceCharts from './components/PerformanceCharts';
 import RunHistory from './components/RunHistory';
 import ExportButton from './components/ExportButton';
-import SettingsPanel from './components/SettingsPanel';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import RepoVisualizer from './components/RepoVisualizer';
 import { useRun } from './context/RunContext';
@@ -49,8 +47,7 @@ const Section = ({ label, children, className = '' }) => (
 /* ─── App Content ────────────────────────────────────────────────── */
 function AppContent() {
   const { error, currentRun } = useRun();
-  const [showHistory, setShowHistory]   = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const isRunning   = currentRun?.status === 'running' || currentRun?.status === 'started';
   const isCompleted = currentRun?.status === 'completed';
@@ -59,7 +56,6 @@ function AppContent() {
     <div className="app-root">
       {/* ── Sticky Topbar ── */}
       <AppHeader
-        onOpenSettings={() => setShowSettings(true)}
         onOpenHistory={() => setShowHistory(true)}
       />
 
@@ -160,14 +156,10 @@ function AppContent() {
       <Modal isOpen={showHistory} onClose={() => setShowHistory(false)} title="Run History">
         <RunHistory onSelectRun={() => setShowHistory(false)} />
       </Modal>
-      <Modal isOpen={showSettings} onClose={() => setShowSettings(false)} title="Settings">
-        <SettingsPanel onClose={() => setShowSettings(false)} />
-      </Modal>
 
       <KeyboardShortcuts shortcuts={[
         { key: 'h', ctrl: true, action: () => setShowHistory(h => !h),  description: 'Toggle history' },
-        { key: 's', ctrl: true, action: () => setShowSettings(true),    description: 'Open settings' },
-        { key: 'Escape', action: () => { setShowHistory(false); setShowSettings(false); }, description: 'Close modals' }
+        { key: 'Escape', action: () => { setShowHistory(false); }, description: 'Close modals' }
       ]} />
     </div>
   );
@@ -175,10 +167,8 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <RunProvider>
-        <AppContent />
-      </RunProvider>
-    </ThemeProvider>
+    <RunProvider>
+      <AppContent />
+    </RunProvider>
   );
 }

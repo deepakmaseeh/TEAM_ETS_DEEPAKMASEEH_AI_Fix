@@ -1,10 +1,9 @@
 import React from 'react';
-import { Bot, History, Settings, Download, Zap, Moon, Sun } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
+import { Bot, History, Download, Zap } from 'lucide-react';
 import ExportButton from './ExportButton';
 import { useRun } from '../context/RunContext';
 
-export default function AppHeader({ onOpenSettings, onOpenHistory }) {
+export default function AppHeader({ onOpenHistory }) {
   const { currentRun } = useRun();
   const isRunning = currentRun?.status === 'running' || currentRun?.status === 'started';
 
@@ -53,16 +52,9 @@ export default function AppHeader({ onOpenSettings, onOpenHistory }) {
         </div>
 
         <div className="topbar-actions">
-          <ThemeToggle />
-
           <button className="topbar-btn" onClick={onOpenHistory} title="Run History">
             <History size={16} />
             <span>History</span>
-          </button>
-
-          <button className="topbar-btn" onClick={onOpenSettings} title="Settings">
-            <Settings size={16} />
-            <span>Settings</span>
           </button>
 
           {currentRun && <ExportButton />}

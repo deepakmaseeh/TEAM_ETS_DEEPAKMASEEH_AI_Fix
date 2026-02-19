@@ -49,7 +49,8 @@ export function RunProvider({ children }) {
       }
     } catch (err) {
       console.error('Error starting test run:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to start test run');
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to start test run';
+      setError(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
       setLoading(false);
     }
   }, [refreshHistory]);
@@ -115,7 +116,8 @@ export function RunProvider({ children }) {
                 console.warn('Failed to save to localStorage:', err);
               }
             } else if (runData.status === 'failed') {
-              setError(runData.error || 'Agent run failed');
+              const errorMsg = runData.error || 'Agent run failed';
+              setError(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
               // Save failed run to localStorage too
               try {
                 saveRunToHistory(runData);
@@ -129,7 +131,8 @@ export function RunProvider({ children }) {
           console.error('Error polling status:', err);
           // Only set error if it's not a timeout or network error during polling
           if (err.code !== 'ECONNABORTED') {
-            setError(err.response?.data?.error || err.message);
+            const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Unknown error';
+            setError(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
           }
           setLoading(false);
         }
@@ -139,7 +142,8 @@ export function RunProvider({ children }) {
       pollStatus();
     } catch (err) {
       console.error('Error starting run:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to start agent run');
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to start agent run';
+      setError(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
       setLoading(false);
     }
   }, [refreshHistory]);
