@@ -197,8 +197,8 @@ export default function InputSection() {
         </div>
 
         {/* Retry Limit & Button Row */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '24px' }}>
-          <div style={{ width: '140px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ minWidth: '120px' }}>
             <label style={labelStyle}>Max Retries</label>
             <div style={inputWrapperStyle('retry')}>
               <div style={iconWrapperStyle('148, 163, 184')}>

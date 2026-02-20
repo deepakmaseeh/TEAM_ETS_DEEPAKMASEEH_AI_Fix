@@ -3,14 +3,10 @@ import serverless from 'serverless-http';
 
 // Set Vercel environment flags before importing
 process.env.VERCEL = 'true';
-process.env.VERCEL_ENV = process.env.VERCEL_ENV || process.env.VERCEL ? 'production' : 'development';
+process.env.VERCEL_ENV = process.env.VERCEL_ENV || 'production';
 
-// Import and initialize the app
-// The app will be initialized when the module is loaded
-import appModule from '../backend/src/index.js';
-
-// Get the app instance (it's exported as default from index.js)
-const app = appModule.default || appModule;
+// Import the app (routes are now registered synchronously)
+import app from '../backend/src/index.js';
 
 // Wrap with serverless-http for Vercel
 const handler = serverless(app, {

@@ -280,13 +280,18 @@
   gap: 20px;
 }
 
-/* Responsive: collapse side-by-side rows */
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════════════════════════════ */
+
+/* Large desktops: shrink sidebar */
 @media (max-width: 1400px) {
   .page-body {
     grid-template-columns: 1fr 340px;
   }
 }
 
+/* Medium desktops / landscape tablets: sidebar to bottom */
 @media (max-width: 1100px) {
   .page-body {
     grid-template-columns: 1fr;
@@ -295,6 +300,7 @@
   .agent-sidebar {
     position: static;
     height: auto;
+    max-height: 480px;
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
@@ -304,25 +310,172 @@
   }
 }
 
+/* ─── Tablet (768px) ─── */
 @media (max-width: 768px) {
+
+  /* Topbar */
   .app-topbar {
     padding: 0 16px;
+    height: 56px;
+    gap: 10px;
   }
 
+  .logo-ring {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .topbar-title {
+    font-size: 17px;
+  }
+
+  .topbar-subtitle {
+    display: none;
+  }
+
+  .topbar-meta {
+    display: none;
+  }
+
+  /* Hide button text labels, keep icons */
+  .topbar-btn span {
+    display: none;
+  }
+
+  .topbar-btn {
+    padding: 7px 10px;
+  }
+
+  /* Page body */
   .main-col {
     padding: 20px 16px;
+    gap: 20px;
+    min-height: calc(100vh - 56px);
   }
 
+  .agent-sidebar {
+    top: 56px;
+  }
+
+  /* Content grids */
   .row-2col,
   .row-fixes {
     grid-template-columns: 1fr;
   }
 
-  .topbar-meta,
-  .topbar-btn span {
-    display: none;
+  /* Tables: horizontal scroll on small screens */
+  .table-wrapper,
+  .glass-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .glass-table {
+    min-width: 580px;
+  }
+
+  .glass-table th,
+  .glass-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  /* Modal: full-screen on mobile */
+  .modal-content {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 16px 16px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+
+  .modal-overlay {
+    align-items: flex-end;
+  }
+
+  .modal-header {
+    padding: 18px 20px;
+  }
+
+  .modal-body {
+    padding: 16px 20px;
+  }
+
+  /* Footer */
+  .page-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 11px;
+  }
+
+  /* Banners */
+  .banner {
+    font-size: 13px;
+    padding: 12px 16px;
   }
 }
+
+/* ─── Mobile Phone (480px) ─── */
+@media (max-width: 480px) {
+
+  /* Topbar */
+  .app-topbar {
+    padding: 0 12px;
+    height: 52px;
+  }
+
+  .topbar-logo {
+    gap: 10px;
+  }
+
+  .logo-ring {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+  }
+
+  /* Hide center badge on tiny screens */
+  .topbar-center {
+    display: none;
+  }
+
+  /* Main content */
+  .main-col {
+    padding: 16px 12px;
+    gap: 16px;
+    min-height: calc(100vh - 52px);
+  }
+
+  /* Section labels */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  /* Badge/pill sizing */
+  .live-badge,
+  .done-badge,
+  .idle-badge {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+
+  /* Agent sidebar */
+  .agent-sidebar {
+    max-height: 360px;
+  }
+}
+
 
 /* ─────────────────────────────────────────────────────
    Banners
