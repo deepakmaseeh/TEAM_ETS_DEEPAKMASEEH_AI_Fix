@@ -11,6 +11,7 @@ export default function FixesAppliedTable() {
   const [isMobile, setIsMobile] = useState(false);
   const [explanation, setExplanation] = useState(null);
   const [loadingFixId, setLoadingFixId] = useState(null);
+  const [fixFilter, setFixFilter] = useState('all'); // 'all' | 'Fixed' | 'Failed'
 
   const handleExplain = async (fix, index) => {
     setLoadingFixId(index);
@@ -53,7 +54,8 @@ export default function FixesAppliedTable() {
     );
   }
 
-  const fixes = currentRun.results.fixes || [];
+  const allFixes = currentRun.results.fixes || [];
+  const fixes = fixFilter === 'all' ? allFixes : allFixes.filter(f => (f.status || '') === fixFilter);
 
   const cardStyle = {
     background: 'var(--bg-card)',
@@ -122,11 +124,16 @@ export default function FixesAppliedTable() {
           <div style={iconBoxStyle}>
             <Wrench size={24} />
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>Fixes Applied</h2>
             <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
               All fixes attempted during this run
             </p>
+            <select value={fixFilter} onChange={(e) => setFixFilter(e.target.value)} style={{ marginTop: '8px', padding: '6px 10px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '12px' }}>
+              <option value="all">All status</option>
+              <option value="Fixed">Fixed only</option>
+              <option value="Failed">Failed only</option>
+            </select>
           </div>
         </div>
         
@@ -197,11 +204,16 @@ export default function FixesAppliedTable() {
         <div style={iconBoxStyle}>
           <Wrench size={24} />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>Fixes Applied</h2>
           <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
             Detailed breakdown of automated repairs
           </p>
+          <select value={fixFilter} onChange={(e) => setFixFilter(e.target.value)} style={{ marginTop: '8px', padding: '6px 10px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '12px' }}>
+            <option value="all">All status</option>
+            <option value="Fixed">Fixed only</option>
+            <option value="Failed">Failed only</option>
+          </select>
         </div>
       </div>
       

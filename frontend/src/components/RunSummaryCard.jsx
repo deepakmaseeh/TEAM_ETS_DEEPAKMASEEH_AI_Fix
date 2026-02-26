@@ -12,7 +12,8 @@ import {
   Users, 
   User, 
   ExternalLink,
-  LayoutDashboard 
+  LayoutDashboard,
+  GitPullRequest
 } from 'lucide-react';
 
 export default function RunSummaryCard() {
@@ -228,6 +229,20 @@ export default function RunSummaryCard() {
           </div>
           <StatusBadge status={results.ci_status} size="normal" />
         </div>
+
+        {/* PR Link (when available) */}
+        {(currentRun.pr_url || currentRun.pr_number) && (
+          <div style={itemStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <GitPullRequest size={16} color="var(--text-secondary)" />
+              <span style={{ color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Pull Request</span>
+            </div>
+            <a href={currentRun.pr_url || '#'} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {currentRun.pr_url ? 'Open PR' : `PR #${currentRun.pr_number}`}
+              <ExternalLink size={12} />
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

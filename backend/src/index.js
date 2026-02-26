@@ -57,6 +57,46 @@ const workspaceDir = process.env.VERCEL === 'true' || process.env.VERCEL_ENV
 // Configure dotenv
 dotenv.config();
 
+// Audit log (in-memory, last 500 entries)
+const auditLog = [];
+const AUDIT_MAX = 500;
+function audit(action, details = {}) {
+  auditLog.unshift({
+    timestamp: new Date().toISOString(),
+    action,
+    ...details,
+  });
+  if (auditLog.length > AUDIT_MAX) auditLog.pop();
+}
+
+// Optional API key middleware (skip for /health)
+const API_KEY = process.env.API_KEY;
+if (API_KEY) {
+  app.use((req, res, next) => {
+    if (req.path === '/health') return next();
+    const key = req.headers['x-api-key'] || req.headers['authorization']?.replace(/^Bearer\s+/i, '');
+    if (key !== API_KEY) {
+      return res.status(401).json({ error: 'Invalid or missing API key' });
+    }
+    next();
+  });
+}
+
+// Rate limiting (100 requests per 15 minutes per IP)
+let rateLimitMiddleware;
+try {
+  const { default: rateLimit } = await import('express-rate-limit');
+  rateLimitMiddleware = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+} catch (e) {
+  rateLimitMiddleware = (req, res, next) => next();
+}
+app.use(rateLimitMiddleware);
+
 // Middleware (register synchronously)
 app.use(cors({
   origin: process.env.FRONTEND_URL || process.env.VERCEL_URL || '*',
@@ -66,6 +106,12 @@ app.use(express.json());
 
 // Initialize cleanup (will be set up asynchronously)
 let cleanup = null;
+
+// Audit log endpoint
+app.get('/audit-log', (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+  res.json({ entries: auditLog.slice(0, limit), total: auditLog.length });
+});
 
 // Health check
 app.get('/health', async (req, res) => {
@@ -372,6 +418,8 @@ app.post('/run-agent', async (req, res) => {
         }
       });
 
+    audit('run_started', { runId, repo_url: validated.repo_url, team_name: validated.team_name });
+
     res.json({
       run_id: runId,
       status: 'started',
@@ -409,6 +457,47 @@ app.get('/runs/:id/results', (req, res) => {
   }
 
   res.json(run.results);
+});
+
+// List cloned repositories in workspace
+app.get('/workspace', async (req, res) => {
+  try {
+    if (cleanup) {
+      const dirs = await cleanup.listWorkspaceDirs();
+      return res.json({ repos: dirs, total: dirs.length });
+    }
+    const fsPromises = await import('fs/promises');
+    const entries = await fsPromises.readdir(workspaceDir, { withFileTypes: true });
+    const repos = entries.filter(e => e.isDirectory()).map(e => ({
+      name: e.name,
+      size: 0,
+      mtime: new Date().toISOString(),
+      path: path.join(workspaceDir, e.name)
+    }));
+    res.json({ repos, total: repos.length });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to list workspace', details: error.message });
+  }
+});
+
+// Delete a cloned repository from workspace
+app.delete('/workspace/:name', async (req, res) => {
+  const name = decodeURIComponent(req.params.name);
+  if (!name || name.includes('..') || name.includes('/')) {
+    return res.status(400).json({ error: 'Invalid repository name' });
+  }
+  try {
+    if (cleanup) {
+      await cleanup.deleteWorkspaceDir(name);
+    } else {
+      const fsPromises = await import('fs/promises');
+      const dirPath = path.join(workspaceDir, name);
+      await fsPromises.rm(dirPath, { recursive: true, force: true });
+    }
+    res.json({ success: true, message: `Deleted ${name}` });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete workspace', details: error.message });
+  }
 });
 
 // Get run logs

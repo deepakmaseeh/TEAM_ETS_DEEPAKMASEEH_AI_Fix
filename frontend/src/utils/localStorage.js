@@ -72,7 +72,16 @@ export function filterLocalHistory(filters) {
   if (filters.repository) {
     filtered = filtered.filter(r => r.repo_url?.includes(filters.repository));
   }
-  
+
+  if (filters.tag) {
+    filtered = filtered.filter(r => {
+      const tags = r.tags;
+      if (Array.isArray(tags)) return tags.includes(filters.tag);
+      if (typeof tags === 'string') return tags === filters.tag;
+      return false;
+    });
+  }
+
   return filtered;
 }
 
@@ -84,4 +93,45 @@ export function clearHistory() {
     console.error('Error clearing history:', error);
     return false;
   }
+}
+
+export function removeRunsFromHistory(runIds = []) {
+  try {
+    if (!Array.isArray(runIds) || runIds.length === 0) {
+      return true;
+    }
+
+    const idsToRemove = new Set(runIds);
+    const filteredHistory = getRunHistory().filter(run => !idsToRemove.has(run.id));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(filteredHistory));
+    return true;
+  } catch (error) {
+    console.error('Error removing runs from history:', error);
+    return false;
+  }
+}
+
+export function updateRunInHistory(runId, updates) {
+  try {
+    const history = getRunHistory();
+    const idx = history.findIndex(r => r.id === runId);
+    if (idx < 0) return false;
+    history[idx] = { ...history[idx], ...updates };
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    return true;
+  } catch (error) {
+    console.error('Error updating run in history:', error);
+    return false;
+  }
+}
+
+export function getUniqueTagsFromHistory() {
+  const history = getRunHistory();
+  const set = new Set();
+  history.forEach(run => {
+    const tags = run.tags;
+    if (Array.isArray(tags)) tags.forEach(t => set.add(t));
+    else if (typeof tags === 'string' && tags.trim()) set.add(tags.trim());
+  });
+  return Array.from(set).sort();
 }

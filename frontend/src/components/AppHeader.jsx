@@ -1,9 +1,9 @@
 import React from 'react';
-import { Bot, History, Download, Zap } from 'lucide-react';
+import { Bot, History, FolderGit2, Zap } from 'lucide-react';
 import ExportButton from './ExportButton';
 import { useRun } from '../context/RunContext';
 
-export default function AppHeader({ onOpenHistory }) {
+export default function AppHeader({ onOpenHistory, onOpenWorkspace }) {
   const { currentRun } = useRun();
   const isRunning = currentRun?.status === 'running' || currentRun?.status === 'started';
 
@@ -52,6 +52,10 @@ export default function AppHeader({ onOpenHistory }) {
         </div>
 
         <div className="topbar-actions">
+          <button className="topbar-btn" onClick={onOpenWorkspace} title="Cloned Repositories">
+            <FolderGit2 size={16} />
+            <span>Workspace</span>
+          </button>
           <button className="topbar-btn" onClick={onOpenHistory} title="Run History">
             <History size={16} />
             <span>History</span>

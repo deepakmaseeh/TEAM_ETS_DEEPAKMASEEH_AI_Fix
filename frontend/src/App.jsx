@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { RunProvider } from './context/RunContext';
 import AppHeader from './components/AppHeader';
 import InputSection from './components/InputSection';
@@ -13,9 +13,14 @@ import AgentActivity from './components/AgentActivity';
 import RepositoryStats from './components/RepositoryStats';
 import PerformanceCharts from './components/PerformanceCharts';
 import RunHistory from './components/RunHistory';
+import WorkspaceModal from './components/WorkspaceModal';
 import ExportButton from './components/ExportButton';
+import ExportFixesCSV from './components/ExportFixesCSV';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import RepoVisualizer from './components/RepoVisualizer';
+import ResultsJsonViewer from './components/ResultsJsonViewer';
+import ReportDownloadButton from './components/ReportDownloadButton';
+import Toast from './components/Toast';
 import { useRun } from './context/RunContext';
 import { X } from 'lucide-react';
 import './App.css';
@@ -48,15 +53,27 @@ const Section = ({ label, children, className = '' }) => (
 function AppContent() {
   const { error, currentRun } = useRun();
   const [showHistory, setShowHistory] = useState(false);
+  const [showWorkspace, setShowWorkspace] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const reportDownloadRef = useRef(null);
+  const prevRunStatusRef = useRef(currentRun?.status);
 
   const isRunning   = currentRun?.status === 'running' || currentRun?.status === 'started';
   const isCompleted = currentRun?.status === 'completed';
+
+  useEffect(() => {
+    if (currentRun?.status === 'completed' && prevRunStatusRef.current !== 'completed') {
+      setToastVisible(true);
+    }
+    prevRunStatusRef.current = currentRun?.status;
+  }, [currentRun?.status]);
 
   return (
     <div className="app-root">
       {/* ── Sticky Topbar ── */}
       <AppHeader
         onOpenHistory={() => setShowHistory(true)}
+        onOpenWorkspace={() => setShowWorkspace(true)}
       />
 
       {/* ── Page Body ── */}
@@ -125,6 +142,17 @@ function AppContent() {
               <Section label="Repository Visualizer">
                 <RepoVisualizer />
               </Section>
+
+              {/* Row 6: Results JSON + Report download */}
+              <Section label="Results & Report">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <ResultsJsonViewer />
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    <ExportFixesCSV />
+                    <ReportDownloadButton ref={reportDownloadRef} />
+                  </div>
+                </div>
+              </Section>
             </>
           )}
 
@@ -141,7 +169,7 @@ function AppContent() {
           {/* Footer */}
           <footer className="page-footer">
             <span>RIFT 2026 · Team ETS · Deepakmaseeh</span>
-            <span>Powered by Gemini AI</span>
+            <span>Powered by <b>Excel Tech Solutions</b></span>
           </footer>
         </main>
 
@@ -156,10 +184,14 @@ function AppContent() {
       <Modal isOpen={showHistory} onClose={() => setShowHistory(false)} title="Run History">
         <RunHistory onSelectRun={() => setShowHistory(false)} />
       </Modal>
+      <WorkspaceModal isOpen={showWorkspace} onClose={() => setShowWorkspace(false)} />
+
+      <Toast message="Run completed successfully!" visible={toastVisible} onDismiss={() => setToastVisible(false)} />
 
       <KeyboardShortcuts shortcuts={[
-        { key: 'h', ctrl: true, action: () => setShowHistory(h => !h),  description: 'Toggle history' },
-        { key: 'Escape', action: () => { setShowHistory(false); }, description: 'Close modals' }
+        { key: 'h', ctrl: true, action: () => setShowHistory(h => !h), description: 'Toggle history' },
+        { key: 'p', ctrl: true, action: () => reportDownloadRef.current?.download?.(), description: 'Download report (PDF)' },
+        { key: 'Escape', action: () => { setShowHistory(false); setShowWorkspace(false); }, description: 'Close modals' }
       ]} />
     </div>
   );
